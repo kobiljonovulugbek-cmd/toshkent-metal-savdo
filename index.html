@@ -1390,8 +1390,8 @@
     if(CONFIG.hubspotPortal&&CONFIG.hubspotForm&&lead){
       try{
         const hutk=(document.cookie.match(/hubspotutk=([^;]+)/)||[])[1];
-        const r=await fetch('https://api-eu1.hsforms.com/submissions/v3/integration/submit/'+CONFIG.hubspotPortal+'/'+CONFIG.hubspotForm,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:[{name:'firstname',value:lead.name},{name:'phone',value:lead.phone},{name:'message',value:text}],context:{pageUri:location.href,pageName:document.title,hutk}})});
-        hs=r.ok;
+        const r=await fetch('https://api-eu1.hsforms.com/submissions/v3/integration/submit/'+CONFIG.hubspotPortal+'/'+CONFIG.hubspotForm,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:[{name:'email',value:lead.phone.replace(/\D/g,'')+'@lead.toshkentmetal.uz'},{name:'firstname',value:lead.name},{name:'phone',value:lead.phone},{name:'message',value:text}],context:{pageUri:location.href,pageName:document.title,hutk}})});
+        hs=r.ok; // email-заглушка из телефона: HubSpot создаёт контакт только с email
       }catch(e){}
     }
     let tg='not-configured';
