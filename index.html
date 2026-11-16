@@ -851,6 +851,7 @@
         </div>
         <div class="field"><label for="fMsg">Комментарий</label><textarea id="fMsg" name="msg" placeholder="Позиции, объём, адрес доставки"></textarea></div>
         <button type="submit" class="btn glass glass--tint">Отправить заявку</button>
+        <a class="btn glass" data-tgbot target="_blank" rel="noopener" style="margin-top:10px;width:100%;justify-content:center;text-align:center">✈️ Или оставьте заявку в Telegram-боте</a>
         <div class="form-msg" id="formMsg" role="alert" data-dyn></div>
         <small class="policy">Нажимая кнопку, вы соглашаетесь на обработку персональных данных.</small>
       </form>
@@ -911,6 +912,7 @@
   /* ================= НАСТРОЙКИ — меняйте здесь ================= */
   const CONFIG={
     telegram:'+998998277771',     // Telegram: номер с + или имя без @
+    telegramBot:'tms_zayavki_bot', // Telegram-бот для заявок (заявки идут в HubSpot)
     whatsapp:'998998277771',       // номер WhatsApp только цифрами
     // Отправка заявок. Вариант 1 (надёжный): адрес вашего обработчика, который пересылает заявку в Telegram.
     endpoint:'',
@@ -1174,6 +1176,7 @@
   $$('.lang button').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.lang,true)));
   $$('[data-tg]').forEach(a=>a.href='https://t.me/'+CONFIG.telegram);
   $$('[data-wa]').forEach(a=>a.href='https://wa.me/'+CONFIG.whatsapp);
+  $$('[data-tgbot]').forEach(a=>{ if(CONFIG.telegramBot) a.href='https://t.me/'+CONFIG.telegramBot; else a.hidden=true; });
   $$('[data-tgc]').forEach(a=>{ if(CONFIG.telegramChannel) a.href='https://t.me/'+CONFIG.telegramChannel; else a.hidden=true; });
   [['#revY',CONFIG.yandexReviews],['#revG',CONFIG.googleReviews]].forEach(([id,u])=>{ if(u){ $(id).href=u; $(id).hidden=false; $('#revLinks').hidden=false; } });
 
