@@ -934,6 +934,9 @@
     whatsapp:'998712000000',       // номер WhatsApp только цифрами
     // Отправка заявок. Вариант 1 (надёжный): адрес вашего обработчика, который пересылает заявку в Telegram.
     endpoint:'',
+    // HubSpot CRM: заявки с сайта попадают в HubSpot (контакты). Чтобы отключить — очистите hubspotForm.
+    hubspotPortal:'149790151',
+    hubspotForm:'36700f9c-973a-4c2a-941e-3553b4470ac3',
     // Вариант 2 (простой): токен бота и ID чата. Токен будет виден в коде страницы.
     tgBotToken:'',
     tgChatId:'',
@@ -1382,7 +1385,20 @@
   });
 
   /* ================= ФОРМА → TELEGRAM ================= */
-  async function sendLead(text){
+  async function sendLead(text,lead){
+    let hs=false;
+    if(CONFIG.hubspotPortal&&CONFIG.hubspotForm&&lead){
+      try{
+        const hutk=(document.cookie.match(/hubspotutk=([^;]+)/)||[])[1];
+        const r=await fetch('https://api-eu1.hsforms.com/submissions/v3/integration/submit/'+CONFIG.hubspotPortal+'/'+CONFIG.hubspotForm,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:[{name:'firstname',value:lead.name},{name:'phone',value:lead.phone},{name:'message',value:text}],context:{pageUri:location.href,pageName:document.title,hutk}})});
+        hs=r.ok;
+      }catch(e){}
+    }
+    let tg='not-configured';
+    try{ tg=await sendLeadTg(text); }catch(e){ if(!hs) throw e; }
+    return (hs||tg==='sent')?'sent':'not-configured';
+  }
+  async function sendLeadTg(text){
     if(CONFIG.endpoint){
       const r=await fetch(CONFIG.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
       if(!r.ok) throw new Error('endpoint'); return 'sent';
@@ -1404,7 +1420,7 @@
     const text=['Новая заявка с сайта','Имя: '+name.value.trim(),'Телефон: '+phone.value.trim(),'Интерес: '+form.elements.type.value,'Комментарий: '+(form.elements.msg.value.trim()||'—'),'Доставка: '+cDel.options[cDel.selectedIndex].text,'Язык: '+LANG.toUpperCase()].join('\n');
     btn.disabled=true; label.nodeValue=t('Отправляем…');
     try{
-      const r=await sendLead(text);
+      const r=await sendLead(text,{name:name.value.trim(),phone:phone.value.trim()});
       if(r==='sent'){ form.style.display='none'; $('#success').style.display='block'; calcItems=[]; saveCart(); renderList(); }
       else { formMsg.textContent=t('Отправка заявок ещё не настроена: заявка не отправлена. Укажите данные Telegram-бота в настройках CONFIG.'); formMsg.classList.add('show'); }
     }catch(err){ formMsg.textContent=t('Не удалось отправить заявку. Позвоните нам или напишите в Telegram.'); formMsg.classList.add('show'); }
